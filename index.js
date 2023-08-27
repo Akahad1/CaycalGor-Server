@@ -1,6 +1,6 @@
 const express=require("express")
 const cors =require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app =express()
 
 app.use(cors())
@@ -43,16 +43,29 @@ async function run() {
 
     })
     app.get('/products',async (req,res)=>{
-      console.log(req.query)
+      
       const page =parseInt(req.query.page) || 0
-      const limit =parseInt(req.query.limit)||3
+      const limit =parseInt(req.query.limit)||5
       const skip=page*limit
-        const query={}
-        const result= await ProductsCollction.find(query).skip(skip).limit(limit).toArray()
+      const bike=req.query.bike;
+      const query1={category:bike}
+      const query={}
+      const query2=bike?query1: query
+     
+       
+        const result= await ProductsCollction.find( query2).skip(skip).limit(limit).toArray()
         res.send(result)
 
 
     })
+    app.get('/products/:id',async(req,res)=>{
+      const id =req.params.id;
+      console.log(id)
+      const query ={_id:ObjectId(id)}
+      const result= await ProductsCollction.findOne(query)
+      res.send(result)
+    })
+
     app.get('/totalproducts',async (req,res)=>{
        
         const result= await ProductsCollction.estimatedDocumentCount()
