@@ -27,6 +27,8 @@ const client = new MongoClient(uri, {
 });
 // const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const ProductsCollction = client.db('CycalGor').collection('Products')
+const ReviewCollction =client.db('CycalGor').collection("Reviews")
+const CartProductCollction =client.db('CycalGor').collection("CartProduct")
 async function run() {
   try {
   
@@ -72,6 +74,32 @@ async function run() {
         res.send({totalproducts:result})
 
 
+    })
+    app.post('/reviews',async(req,res)=>{
+      const review=req.body;
+      const result= await ReviewCollction.insertOne(review)
+      res.send(result)
+
+    })
+    app.get('/reviews',async(req,res)=>{
+      const reviewId=req.query.review;
+      const qurey={ProductsId : reviewId}
+
+      const result= await ReviewCollction.find(qurey).toArray()
+      res.send(result)
+
+    })
+    app.post('/addCart',async(req,res)=>{
+      const cartProduct=req.body;
+      const result = await CartProductCollction.insertOne(cartProduct)
+      res.send(result)
+    })
+
+    app.get('/addCart',async (req,res)=>{
+      const qurey={}
+
+      const result =await CartProductCollction.find(qurey).toArray()
+      res.send(result)
     })
    
    
