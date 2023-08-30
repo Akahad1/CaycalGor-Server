@@ -29,6 +29,7 @@ const client = new MongoClient(uri, {
 const ProductsCollction = client.db('CycalGor').collection('Products')
 const ReviewCollction =client.db('CycalGor').collection("Reviews")
 const CartProductCollction =client.db('CycalGor').collection("CartProduct")
+const OrderDataCollction =client.db('CycalGor').collection("OrderData")
 async function run() {
   try {
   
@@ -38,31 +39,35 @@ async function run() {
   
 
     app.get('/product',async (req,res)=>{
-        const qurey={}
-        const result= await ProductsCollction.find(qurey).limit(6).toArray()
+      const search=req.query.search;
+      const query={category:{$regex :search,$options:'i'}}
+        
+        const result= await ProductsCollction.find(query).limit(6).toArray()
         res.send(result)
 
 
     })
     app.get('/products',async (req,res)=>{
-      
+      const search=req.query.search;
+      console.log(search)
       const page =parseInt(req.query.page) || 0
       const limit =parseInt(req.query.limit)||5
       const skip=page*limit
       const bike=req.query.bike;
       const query1={category:bike}
+      const query3={category:{$regex :search,$options:'i'}}
       const query={}
-      const query2=bike?query1: query
+      const query2=bike?query1&query3: query3
      
        
-        const result= await ProductsCollction.find( query2).skip(skip).limit(limit).toArray()
+        const result= await ProductsCollction.find(query2,query3).skip(skip).limit(limit).toArray()
         res.send(result)
 
 
     })
     app.get('/products/:id',async(req,res)=>{
       const id =req.params.id;
-      console.log(id)
+      
       const query ={_id:ObjectId(id)}
       const result= await ProductsCollction.findOne(query)
       res.send(result)
@@ -96,11 +101,26 @@ async function run() {
     })
 
     app.get('/addCart',async (req,res)=>{
-      const qurey={}
+      const email=req.query.email
+      const qurey={email:email}
 
       const result =await CartProductCollction.find(qurey).toArray()
       res.send(result)
     })
+    app.delete("/addCart/:id",async(req,res)=>{
+      const Cartid=req.params.id
+      console.log(Cartid)
+      const qurey ={_id :ObjectId(Cartid)}
+      const result= await CartProductCollction.deleteOne(qurey)
+      res.send(result)
+    })
+    app.post('/order',async(req,res)=>{
+      const orderData=req.body;
+      console.log(orderData)
+      const result=await OrderDataCollction.insertOne(orderData)
+      res.send(result)
+    })
+     
    
    
 
